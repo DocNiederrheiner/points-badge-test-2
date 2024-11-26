@@ -1,7 +1,7 @@
 import { User } from './types/user.interface';
 import { Icon } from './types/icon.enum';
 
-export const getUsersBadge = ( user: User ): Icon => {
+export const getUsersBadge = async ( user: User ): Promise<Icon> => {
     let result : Icon | null = null;
     // Get the values from Icon, sort them in reverse order, then loop over array
     console.log(Object.values(Icon).filter((v) => !isNaN(Number(v))).sort((n1,n2) => Number(n2)-Number(n1)));
@@ -21,3 +21,4 @@ export const getUsersBadge = ( user: User ): Icon => {
     return result;
 };
 
+getUsersBadge({id:"test",username:"Testimann",solutionCount:27}).then((value) => {console.log(value)});
