@@ -22,28 +22,58 @@ export const getUsersBadge = async ( user: User ): Promise<Icon> => {
     return result;
 };
 
-function calculateUsersStatistics() {
-  getAllUser().then((users) => {
-    let avgSolutionCount = 0;
-    users = users.sort((a,b) => b.solutionCount-a.solutionCount);
-    let badges : Promise<Icon>[] = [];
-    users.forEach(async (user) => {
-      avgSolutionCount += user.solutionCount;
-      badges.push(getUsersBadge(user));
-    })
-    avgSolutionCount = avgSolutionCount/users.length;
-    // Print statistics in console
-    console.log("Total number of users: "+ users.length);
-    console.log("Average solution count: "+ avgSolutionCount);
-    console.log("Top 5 User:")
-    for(let i = 0; i<= 4; i++){
-      console.log((i+1)+". "+users[i].username+": "+users[i].solutionCount+" solutions");
-    }
-    Promise.all(badges).then((resolvedBadges) => console.log("The most given badge is "+ Icon[findTopBadge(resolvedBadges)]));
-  });
-
+async function calculateUsersStatistics() {
+  const users = await getAllUser();
   
+  // Berechnung des Durchschnitts und Sortierung
+  let avgSolutionCount = 0;
+  users.forEach((user) => {
+    avgSolutionCount += user.solutionCount;
+  });
+  avgSolutionCount = avgSolutionCount / users.length;
+  users.sort((a, b) => b.solutionCount - a.solutionCount);
+
+  // Konfiguration des Pools
+  const MAX_CONCURRENT = 20;
+  const badges: Icon[] = [];
+  const pool: Promise<void>[] = [];
+
+  const processBatch = async (user: typeof users[number]) => {
+    const badge = await getUsersBadge(user);
+    badges.push(badge);
+  };
+
+  // Verwalten eines limitierten Pools
+  for (const user of users) {
+    if (pool.length >= MAX_CONCURRENT) {
+      await Promise.race(pool); // Warte, bis ein Platz im Pool frei wird
+    }
+
+    // Erstelle ein neues Promise und füge es zum Pool hinzu
+    const task = processBatch(user).finally(() => {
+      // Entferne das abgeschlossene Promise aus dem Pool
+      pool.splice(pool.indexOf(task), 1);
+    });
+
+    pool.push(task);
+  }
+
+  // Warte, bis alle Promises abgeschlossen sind
+  await Promise.all(pool);
+
+  // Ausgabe der Statistiken
+  console.log("Total number of users: " + users.length);
+  console.log("Average solution count: " + avgSolutionCount);
+  console.log("Top 5 Users:");
+  for (let i = 0; i < Math.min(5, users.length); i++) {
+    console.log((i + 1) + ". " + users[i].username + ": " + users[i].solutionCount + " solutions");
+  }
+
+  const topBadge = findTopBadge(badges);
+  console.log("The most given badge is " + Icon[topBadge]);
 }
+
+
 
 calculateUsersStatistics();
 
