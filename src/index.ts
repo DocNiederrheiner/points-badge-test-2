@@ -18,5 +18,3 @@ export const getUsersBadge = async ( user: User ): Promise<Icon> => {
         result = Icon.DEFAULT;
     return result;
 };
-
-getUsersBadge({id:"test",username:"Testimann",solutionCount:27}).then((value) => {console.log(value)});
