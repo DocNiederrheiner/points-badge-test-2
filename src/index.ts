@@ -13,8 +13,8 @@ export const getUsersBadge = async ( user: User ): Promise<Icon> => {
               }
         }
    })
-    // If code reaches this point, solution count is negative. Returning default.
+    // If code reaches this point, solution count is negative. Returning Bad Ass.
     if(result === null)
-        result = Icon.DEFAULT;
+        result = Icon.BADGE_BAD_ASS;
     return result;
 };
