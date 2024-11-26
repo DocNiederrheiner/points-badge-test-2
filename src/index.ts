@@ -1,6 +1,7 @@
 import { User } from './types/user.interface';
 import { Icon } from './types/icon.enum';
 import { getAllUser } from './user-store';
+import { emulateLongProcess } from './emulate-long-process';
 
 export const getUsersBadge = async ( user: User ): Promise<Icon> => {
     let result : Icon | null = null;
@@ -17,6 +18,7 @@ export const getUsersBadge = async ( user: User ): Promise<Icon> => {
     // If code reaches this point, solution count is negative. Returning Bad Ass.
     if(result === null)
         result = Icon.BADGE_BAD_ASS;
+    await emulateLongProcess();
     return result;
 };
 
